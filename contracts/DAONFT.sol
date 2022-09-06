@@ -5,6 +5,10 @@ import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 
+interface IToken {
+    function mint(address to, uint256 amount) external;
+}
+
 contract DAONFT is ERC721, Ownable {
     using Counters for Counters.Counter;
 
@@ -14,18 +18,14 @@ contract DAONFT is ERC721, Ownable {
     uint8[9] _uniqueParameterValues = [1, 1, 2, 6, 2, 3, 4, 6, 5];
 
     mapping(uint256 => uint8) tokenIdToRarity;
-    address public tokenContractAddr;
+    IToken tokenContract;
 
     constructor() ERC721('DAONFT', 'DAON') {}
-
-    function callTokenMint(address _to, uint256 _amount) private {
-        tokenContractAddr.call(abi.encodeWithSignature('mint(address, uint256)', _to, _amount));
-    }
 
     function safeMint() external payable {
         require(msg.value > 0, 'The amount sent must be greater than zero');
 
-        callTokenMint(msg.sender, msg.value);
+        tokenContract.mint(msg.sender, msg.value);
 
         uint256 tokenId = _tokenIdCounter.current();
         uint256 tokenRarityIndex = _tokenRarityIndexCounter.current();
@@ -50,7 +50,7 @@ contract DAONFT is ERC721, Ownable {
         return _uniqueParameterValues;
     }
 
-    function setTokenContractAddr(address _addr) public onlyOwner {
-        tokenContractAddr = _addr;
+    function setTokenContract(address _addr) public onlyOwner {
+        tokenContract = IToken(_addr);
     }
 }
