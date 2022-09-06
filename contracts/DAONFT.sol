@@ -11,11 +11,14 @@ contract DAONFT is ERC721 {
     Counters.Counter private _tokenRarityIndexCounter;
 
     uint8[9] _uniqueParameterValues = [1, 1, 2, 6, 2, 3, 4, 6, 5];
+
     mapping(uint256 => uint8) tokenIdToRarity;
 
     constructor() ERC721('DAONFT', 'DAON') {}
 
-    function safeMint() public {
+    function safeMint() public payable {
+        require(msg.value > 0);
+
         uint256 tokenId = _tokenIdCounter.current();
         uint256 tokenRarityIndex = _tokenRarityIndexCounter.current();
 
