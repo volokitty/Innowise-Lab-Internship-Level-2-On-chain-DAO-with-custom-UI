@@ -2,7 +2,6 @@
 pragma solidity ^0.8.4;
 
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 
@@ -15,16 +14,18 @@ contract DAONFT is ERC721, Ownable {
     uint8[9] _uniqueParameterValues = [1, 1, 2, 6, 2, 3, 4, 6, 5];
 
     mapping(uint256 => uint8) tokenIdToRarity;
-
-    address tokenAddr;
+    address public tokenContractAddr;
 
     constructor() ERC721('DAONFT', 'DAON') {}
 
+    function callTokenMint(address _to, uint256 _amount) private {
+        tokenContractAddr.call(abi.encodeWithSignature('mint(address, uint256)', _to, _amount));
+    }
+
     function safeMint() external payable {
         require(msg.value > 0, 'The amount sent must be greater than zero');
-        require(msg.value <= TOKENS_ON_CONTRACT, 'Not enough tokens in reserve');
 
-        owner.transfer(_value);
+        callTokenMint(msg.sender, msg.value);
 
         uint256 tokenId = _tokenIdCounter.current();
         uint256 tokenRarityIndex = _tokenRarityIndexCounter.current();
@@ -49,7 +50,7 @@ contract DAONFT is ERC721, Ownable {
         return _uniqueParameterValues;
     }
 
-    function setTokenAddr(address _addr) public onlyOwner {
-        tokenAddr = _addr;
+    function setTokenContractAddr(address _addr) public onlyOwner {
+        tokenContractAddr = _addr;
     }
 }
