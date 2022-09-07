@@ -48,11 +48,11 @@ contract NFT is ERC721, AccessControl {
         _safeMint(msg.sender, tokenId);
     }
 
-    function getTokenRarity(uint256 tokenId) public view returns (uint8) {
-        return tokenIdToRarity[tokenId];
+    function getTokenRarity(uint256 _tokenId) public view returns (uint8) {
+        return tokenIdToRarity[_tokenId];
     }
 
-    function setUniqueParameterValues(uint8[9] memory _uniqueParameterValues)
+    function setUniqueParameterValues(uint8[9] calldata _uniqueParameterValues)
         public
         onlyRole(UNIQUE_PARAMETER_SETTER_ROLE)
     {
@@ -65,8 +65,8 @@ contract NFT is ERC721, AccessControl {
         return uniqueParameterValues;
     }
 
-    function setUniqueParameterSetterRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _grantRole(UNIQUE_PARAMETER_SETTER_ROLE, account);
+    function setUniqueParameterSetterRole(address _account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _grantRole(UNIQUE_PARAMETER_SETTER_ROLE, _account);
     }
 
     function setTokenContract(address _addr) public onlyRole(DEFAULT_ADMIN_ROLE) {

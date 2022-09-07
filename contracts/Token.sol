@@ -5,9 +5,7 @@ import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
 
-import './interfaces/IToken.sol';
-
-contract Token is IToken, ERC20, ERC20Burnable, AccessControl {
+contract Token is ERC20, ERC20Burnable, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256('MINTER_ROLE');
 
     constructor() ERC20('Token', 'DAOT') {
@@ -15,11 +13,11 @@ contract Token is IToken, ERC20, ERC20Burnable, AccessControl {
         _grantRole(MINTER_ROLE, msg.sender);
     }
 
-    function mint(address to, uint256 amount) public override onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
 
-    function setMinterRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _grantRole(MINTER_ROLE, account);
+    function setMinterRole(address _account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _grantRole(MINTER_ROLE, _account);
     }
 }
