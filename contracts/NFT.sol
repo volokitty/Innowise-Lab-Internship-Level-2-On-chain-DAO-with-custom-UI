@@ -80,7 +80,11 @@ contract NFT is ERC721, Ownable {
         daoContract = IDAO(_addr);
     }
 
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+
     function transferToOwner() public onlyOwner {
-        owner.transfer(msg.value);
+        payable(owner()).transfer(address(this).balance);
     }
 }
