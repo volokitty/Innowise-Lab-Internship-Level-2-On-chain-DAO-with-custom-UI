@@ -38,7 +38,7 @@ contract DAO is Ownable {
     mapping(bytes32 => mapping(address => Vote)) public votingHashToVoters;
 
     function isVotingAccepted(uint256 _votingIndex) public view returns (bool) {
-        Voting voting = votings[_votingIndex];
+        Voting memory voting = votings[_votingIndex];
 
         if (voting.positive > voting.negative) {
             return true;
