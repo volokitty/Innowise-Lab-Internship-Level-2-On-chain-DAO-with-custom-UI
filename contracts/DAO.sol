@@ -99,12 +99,18 @@ contract DAO is Ownable {
         tokenContract = IToken(_addr);
     }
 
-    function getLastVotingUniqueParameters() public view returns (uint8[9] memory) {
-        return votings[lastVotingIndex].uniqueParameterValues;
+    function isVotingEnded() public view returns (bool) {
+        if (votings.length > 0 && block.timestamp > votings[lastVotingIndex].endTime) {
+            return true;
+        }
+
+        return false;
     }
 
-    function isLastVotingEnded() public view returns (bool) {
+    function getLastVotingUniqueParameters() public view returns (uint8[9] memory) {
         require(votings.length > 0, "There hasn't been votings yet");
-        return block.timestamp > votings[lastVotingIndex].endTime;
+        require(isVotingEnded(), "The voting hasn't ended");
+
+        return votings[lastVotingIndex].uniqueParameterValues;
     }
 }

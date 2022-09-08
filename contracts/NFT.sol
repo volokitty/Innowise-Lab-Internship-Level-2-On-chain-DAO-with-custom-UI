@@ -3,33 +3,49 @@ pragma solidity ^0.8.4;
 
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
-import '@openzeppelin/contracts/access/AccessControl.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
 
 import './interfaces/IToken.sol';
+import './interfaces/IDAO.sol';
 
-contract NFT is ERC721, AccessControl {
+contract NFT is ERC721, Ownable {
     using Counters for Counters.Counter;
-
-    bytes32 public constant UNIQUE_PARAMETER_SETTER_ROLE =
-        keccak256('UNIQUE_PARAMETER_SETTER_ROLE');
 
     Counters.Counter private _tokenIdCounter;
     Counters.Counter private _tokenRarityIndexCounter;
 
     uint8[9] uniqueParameterValues = [1, 1, 2, 6, 2, 3, 4, 6, 5];
-    event ChangeUniqueParameterValues(uint8[9] uniqueParameterValues);
 
     mapping(uint256 => uint8) tokenIdToRarity;
 
     IToken tokenContract;
+    IDAO daoContract;
 
-    constructor() ERC721('NFT', 'DAON') {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(UNIQUE_PARAMETER_SETTER_ROLE, msg.sender);
+    constructor() ERC721('NFT', 'DAON') {}
+
+    function needToUpdateUniqueParameterValues() private view returns (bool) {
+        uint8[9] memory daoUniqueParameterValues = daoContract.getLastVotingUniqueParameters();
+
+        for (uint256 i = 0; i < 9; i++) {
+            if (uniqueParameterValues[i] != daoUniqueParameterValues[i]) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function setUniqueParameterValues(uint8[9] memory _uniqueParameterValues) private {
+        uniqueParameterValues = _uniqueParameterValues;
+        _tokenRarityIndexCounter.reset();
     }
 
     function safeMint() external payable {
         require(msg.value > 0, 'The amount sent must be greater than zero');
+
+        if (daoContract.isVotingEnded() && needToUpdateUniqueParameterValues()) {
+            setUniqueParameterValues(daoContract.getLastVotingUniqueParameters());
+        }
 
         tokenContract.mint(msg.sender, msg.value);
 
@@ -52,33 +68,19 @@ contract NFT is ERC721, AccessControl {
         return tokenIdToRarity[_tokenId];
     }
 
-    function setUniqueParameterValues(uint8[9] calldata _uniqueParameterValues)
-        public
-        onlyRole(UNIQUE_PARAMETER_SETTER_ROLE)
-    {
-        uniqueParameterValues = _uniqueParameterValues;
-        _tokenRarityIndexCounter.reset();
-        emit ChangeUniqueParameterValues(_uniqueParameterValues);
-    }
-
     function getUniqueParameterValues() public view returns (uint8[9] memory) {
         return uniqueParameterValues;
     }
 
-    function setUniqueParameterSetterRole(address _account) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _grantRole(UNIQUE_PARAMETER_SETTER_ROLE, _account);
-    }
-
-    function setTokenContract(address _addr) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setTokenContract(address _addr) public onlyOwner {
         tokenContract = IToken(_addr);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, AccessControl)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
+    function setDAOContract(address _addr) public onlyOwner {
+        daoContract = IDAO(_addr);
+    }
+
+    function transferToOwner() public onlyOwner {
+        owner.transfer(msg.value);
     }
 }
