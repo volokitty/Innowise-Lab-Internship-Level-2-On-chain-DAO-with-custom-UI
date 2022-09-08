@@ -1,7 +1,14 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { deployNFT, deployTokenAndNFT } from "./utils/deploy.ts";
+import { deployToken, deployNFT } from "./utils/deploy.ts";
+
+async function deployTokenAndNFT() {
+    const { token } = await deployToken();
+    const { signers, nft } = await deployNFT();
+
+    return { token, nft, signers };
+}
 
 describe("NFT", function () {
     describe("Deployment", function () {

@@ -18,11 +18,13 @@ async function deployNFT() {
     return { signers, nft };
 }
 
-async function deployTokenAndNFT() {
-    const { token } = await deployToken();
-    const { signers, nft } = await deployNFT();
+async function deployDAO() {
+    const signers = await ethers.getSigners();
 
-    return { token, nft, signers };
+    const DAOContract = await ethers.getContractFactory("DAO");
+    const dao = await DAOContract.deploy();
+
+    return { signers, dao };
 }
 
-export { deployToken, deployNFT, deployTokenAndNFT };
+export { deployToken, deployNFT, deployDAO };
