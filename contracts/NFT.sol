@@ -43,7 +43,11 @@ contract NFT is ERC721, Ownable {
     function safeMint() external payable {
         require(msg.value > 0, 'The amount sent must be greater than zero');
 
-        if (daoContract.isVotingEnded() && needToUpdateUniqueParameterValues()) {
+        if (
+            daoContract.getVotingsCount() > 0 &&
+            daoContract.isVotingEnded() &&
+            needToUpdateUniqueParameterValues()
+        ) {
             setUniqueParameterValues(daoContract.getLastVotingUniqueParameters());
         }
 
@@ -70,6 +74,10 @@ contract NFT is ERC721, Ownable {
 
     function getUniqueParameterValues() public view returns (uint8[9] memory) {
         return uniqueParameterValues;
+    }
+
+    function getNextTokenId() public view returns (uint256) {
+        return _tokenIdCounter.current();
     }
 
     function setTokenContract(address _addr) public onlyOwner {

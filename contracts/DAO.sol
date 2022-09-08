@@ -4,8 +4,14 @@ pragma solidity ^0.8.4;
 import '@openzeppelin/contracts/access/Ownable.sol';
 
 import './interfaces/IToken.sol';
+import './interfaces/INFT.sol';
 
 contract DAO is Ownable {
+    enum VotingType {
+        TOKEN,
+        NFT
+    }
+
     struct Vote {
         bool isPositive;
         uint256 amount;
@@ -13,6 +19,7 @@ contract DAO is Ownable {
 
     struct Voting {
         address author;
+        VotingType votingType;
         string description;
         uint8[9] uniqueParameterValues;
         uint256 startTime;
@@ -23,40 +30,83 @@ contract DAO is Ownable {
     }
 
     IToken tokenContract;
+    INFT nftContract;
 
     Voting[] public votings;
     uint256 public lastVotingIndex;
 
     mapping(bytes32 => mapping(address => Vote)) public votingHashToVoters;
 
-    function vote(uint256 _amount, bool isPositive) external {
+    function addVote(uint256 _amount, bool _isPositive) private {
+        votingHashToVoters[votings[lastVotingIndex].hash][msg.sender] = Vote({
+            isPositive: _isPositive,
+            amount: _amount
+        });
+    }
+
+    function tokenVote(uint256 _amount, bool _isPositive) private {
+        require(_amount > 0, 'Send more tokens than zero to vote');
+        require(tokenContract.balanceOf(msg.sender) >= _amount, 'Not enough tokens to vote');
+
+        tokenContract.burnFrom(msg.sender, _amount);
+
+        if (_isPositive) {
+            votings[lastVotingIndex].positive += _amount;
+        } else {
+            votings[lastVotingIndex].negative += _amount;
+        }
+
+        addVote(_amount, _isPositive);
+    }
+
+    function nftVote(bool _isPositive) private {
+        require(
+            nftContract.balanceOf(msg.sender) > 0,
+            "Can't vote because there is no nft on balance"
+        );
+
+        uint256 nextTokenId = nftContract.getNextTokenId();
+        uint256 amount = 0;
+
+        for (uint256 tokenId = 0; tokenId < nextTokenId; tokenId++) {
+            if (nftContract.ownerOf(tokenId) == msg.sender) {
+                amount += nftContract.getTokenRarity(tokenId);
+            }
+        }
+
+        if (_isPositive) {
+            votings[lastVotingIndex].positive += amount;
+        } else {
+            votings[lastVotingIndex].negative += amount;
+        }
+
+        addVote(amount, _isPositive);
+    }
+
+    function vote(uint256 _amount, bool _isPositive) external {
         require(votings.length > 0, 'There is no voting');
         require(block.timestamp < votings[lastVotingIndex].endTime, 'The voting has ended');
         require(
             votingHashToVoters[votings[lastVotingIndex].hash][msg.sender].amount == 0,
             "Can't vote again"
         );
-        require(_amount > 0, 'Send more tokens than zero to vote');
-        require(tokenContract.balanceOf(msg.sender) >= _amount, 'Not enough tokens to vote');
 
-        tokenContract.burnFrom(msg.sender, _amount);
+        VotingType votingType = votings[lastVotingIndex].votingType;
 
-        if (isPositive) {
-            votings[lastVotingIndex].positive += _amount;
+        if (votingType == VotingType.TOKEN) {
+            tokenVote(_amount, _isPositive);
+        } else if (votingType == VotingType.NFT) {
+            nftVote(_isPositive);
         } else {
-            votings[lastVotingIndex].negative += _amount;
+            revert('Unknown type of voting');
         }
-
-        votingHashToVoters[votings[lastVotingIndex].hash][msg.sender] = Vote({
-            isPositive: isPositive,
-            amount: _amount
-        });
     }
 
     function createVoting(
         string calldata _description,
         uint8[9] calldata _uniqueParameterValues,
-        uint256 _votingTime
+        uint256 _votingTime,
+        VotingType _votingType
     ) external {
         require(
             votings.length == 0 || votings[lastVotingIndex].endTime < block.timestamp,
@@ -72,6 +122,7 @@ contract DAO is Ownable {
         votings.push(
             Voting({
                 author: msg.sender,
+                votingType: _votingType,
                 description: _description,
                 uniqueParameterValues: _uniqueParameterValues,
                 startTime: block.timestamp,
@@ -81,6 +132,7 @@ contract DAO is Ownable {
                 hash: keccak256(
                     abi.encode(
                         msg.sender,
+                        _votingType,
                         _description,
                         _uniqueParameterValues,
                         block.timestamp,
@@ -99,8 +151,16 @@ contract DAO is Ownable {
         tokenContract = IToken(_addr);
     }
 
+    function setNFTContract(address _addr) public onlyOwner {
+        nftContract = INFT(_addr);
+    }
+
+    function getVotingsCount() public view returns (uint256) {
+        return votings.length;
+    }
+
     function isVotingEnded() public view returns (bool) {
-        if (votings.length > 0 && block.timestamp > votings[lastVotingIndex].endTime) {
+        if (getVotingsCount() > 0 && block.timestamp > votings[lastVotingIndex].endTime) {
             return true;
         }
 
@@ -108,7 +168,7 @@ contract DAO is Ownable {
     }
 
     function getLastVotingUniqueParameters() public view returns (uint8[9] memory) {
-        require(votings.length > 0, "There hasn't been votings yet");
+        require(getVotingsCount() > 0, "There hasn't been votings yet");
         require(isVotingEnded(), "The voting hasn't ended");
 
         return votings[lastVotingIndex].uniqueParameterValues;
