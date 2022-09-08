@@ -37,6 +37,16 @@ contract DAO is Ownable {
 
     mapping(bytes32 => mapping(address => Vote)) public votingHashToVoters;
 
+    function isVotingAccepted(uint256 _votingIndex) public view returns (bool) {
+        Voting voting = votings[_votingIndex];
+
+        if (voting.positive > voting.negative) {
+            return true;
+        }
+
+        return false;
+    }
+
     function addVote(uint256 _amount, bool _isPositive) private {
         votingHashToVoters[votings[lastVotingIndex].hash][msg.sender] = Vote({
             isPositive: _isPositive,
@@ -165,6 +175,10 @@ contract DAO is Ownable {
         }
 
         return false;
+    }
+
+    function getLastVotingIndex() public view returns (uint256) {
+        return lastVotingIndex;
     }
 
     function getLastVotingUniqueParameters() public view returns (uint8[9] memory) {
