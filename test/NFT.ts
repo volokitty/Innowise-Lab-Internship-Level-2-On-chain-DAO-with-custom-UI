@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { deployToken, deployNFT } from "./utils/deploy.ts";
+import { deployToken, deployNFT } from "../scripts/deploy.ts";
 
 async function deployTokenAndNFT() {
     const { token } = await deployToken();

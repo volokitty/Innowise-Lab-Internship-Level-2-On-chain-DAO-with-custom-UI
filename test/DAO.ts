@@ -1,21 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { deployToken, deployNFT, deployDAO } from "./utils/deploy.ts";
-
-async function deployContracts() {
-    const { signers, token } = await deployToken();
-    const { nft } = await deployNFT();
-    const { dao } = await deployDAO();
-
-    await token.setMinterRole(nft.address);
-    await nft.setTokenContract(token.address);
-    await nft.setDAOContract(dao.address);
-    await dao.setTokenContract(token.address);
-    await dao.setNFTContract(nft.address);
-
-    return { signers, token, nft, dao };
-}
+import { deployContracts } from "../scripts/deploy.ts";
 
 describe("DAO", function () {
     describe("Deployment", function () {

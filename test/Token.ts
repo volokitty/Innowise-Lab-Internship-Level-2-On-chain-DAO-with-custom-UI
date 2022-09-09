@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { deployToken } from "./utils/deploy.ts";
+import { deployToken } from "../scripts/deploy.ts";
 
-describe("Token contract", function () {
+describe("Token", function () {
     describe("Deployment", function () {
         it("should assign zero tokens to all addresses", async function () {
             const { signers, token } = await deployToken();
