@@ -1,0 +1,15 @@
+:root {
+    --color-black: #191C1F;
+    --color-white: #FFFFFF;
+
+    --container-width: 1170px;
+}
+
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
