@@ -3,8 +3,8 @@
   align-items: center;
   justify-content: space-between;
   max-width: var(--container-width);
+  height: 80px;
   margin: 0 auto;
-  padding: 16px 0;
 }
 
 .header div:last-child {

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Navbar from './Navbar';
-import Button from 'shared/ui/Button';
+import ConnectWallet from 'features/ConnectWallet';
 
 import style from './Header.module.css';
 
@@ -13,7 +13,7 @@ const Header: React.FC = () => {
       <div className={logo} />
       <div>
         <Navbar />
-        <Button buttonTheme="dark">Connect wallet</Button>
+        <ConnectWallet />
       </div>
     </header>
   );

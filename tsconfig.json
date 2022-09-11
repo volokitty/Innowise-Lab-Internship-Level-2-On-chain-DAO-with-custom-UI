@@ -7,13 +7,6 @@
       "esnext"
     ],
     "baseUrl": "./src",
-    "paths": {
-      "abi/*": ["abi/*"],
-      "app/*": ["app/*"],
-      "pages/*": ["pages/*"],
-      "widgets/*": ["widgets/*"],
-      "shared/*": ["shared/*"]
-    },
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
