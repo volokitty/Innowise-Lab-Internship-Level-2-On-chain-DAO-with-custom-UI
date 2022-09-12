@@ -1,41 +1,54 @@
-import { useEffect, useState } from 'react';
-import Web3 from 'web3';
+import { useContext, useEffect, useState } from 'react';
+
+import BlockchainContext from 'shared/context/Blockchain/BlockchainContext';
 
 const useConnectWallet = (): {
-  hasEthereumProvider: boolean;
-  connectWallet: () => void;
-  account: string | undefined;
+  buttonText: string;
+  onClick: () => void;
 } => {
-  const [account, setAccount] = useState<string>();
+  const {
+    hasMetamask = false,
+    connected = false,
+    setAccount,
+    setConnected,
+    blockchain,
+  } = useContext(BlockchainContext);
 
-  const web3 = new Web3(Web3.givenProvider);
-
-  const provider = Web3.givenProvider;
-  const hasEthereumProvider = Boolean(provider);
-
-  const connectWallet = (): void => {
-    if (hasEthereumProvider) {
-      const requestAccounts = async (): Promise<string> => {
-        const [account] = await web3.eth.requestAccounts();
-        return account;
-      };
-
-      requestAccounts()
-        .then((account) => setAccount(account))
-        .catch((e) => console.log(e));
-    }
+  const openMetamaskPage = (): void => {
+    blockchain?.openMetamaskPage();
   };
 
-  useEffect(() => {
-    if (hasEthereumProvider) {
-      web3.eth
-        .getAccounts()
-        .then((accounts) => setAccount(accounts[0]))
-        .catch(console.log);
-    }
-  }, []);
+  const connect = (): void => {
+    blockchain
+      ?.connectWallet()
+      .then((account) => {
+        setAccount?.(account);
+        setConnected?.(true);
+      })
+      .catch((e) => console.log(e));
+  };
 
-  return { hasEthereumProvider, connectWallet, account };
+  const disconnect = (): void => {
+    setAccount?.('');
+    setConnected?.(false);
+  };
+
+  const [state, setState] = useState<{ onClick: () => void; buttonText: string }>({
+    onClick: connect,
+    buttonText: 'Connect',
+  });
+
+  useEffect(() => {
+    if (!hasMetamask) {
+      setState({ onClick: openMetamaskPage, buttonText: 'Download Metamask' });
+    } else if (hasMetamask && !connected) {
+      setState({ onClick: connect, buttonText: 'Connect' });
+    } else {
+      setState({ onClick: disconnect, buttonText: 'Disconnect' });
+    }
+  }, [connected]);
+
+  return state;
 };
 
 export default useConnectWallet;
