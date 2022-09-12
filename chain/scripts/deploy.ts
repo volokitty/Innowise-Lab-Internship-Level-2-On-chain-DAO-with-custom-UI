@@ -1,18 +1,18 @@
-import { ethers } from "hardhat";
+import { ethers } from 'hardhat';
 
 async function deployToken() {
-    const signers = await ethers.getSigners();
+  const signers = await ethers.getSigners();
 
-    const TokenContract = await ethers.getContractFactory("Token");
-    const token = await TokenContract.deploy();
+  const TokenContract = await ethers.getContractFactory('Token');
+  const token = await TokenContract.deploy();
 
-    return { signers, token };
+  return { signers, token };
 }
 
 async function deployNFT() {
   const signers = await ethers.getSigners();
 
-  const NFTContract = await ethers.getContractFactory("NFT");
+  const NFTContract = await ethers.getContractFactory('NFT');
   const nft = await NFTContract.deploy();
 
   return { signers, nft };
@@ -21,7 +21,7 @@ async function deployNFT() {
 async function deployDAO() {
   const signers = await ethers.getSigners();
 
-  const DAOContract = await ethers.getContractFactory("DAO");
+  const DAOContract = await ethers.getContractFactory('DAO');
   const dao = await DAOContract.deploy();
 
   return { signers, dao };
@@ -45,8 +45,6 @@ async function main() {
   await deployContracts();
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
