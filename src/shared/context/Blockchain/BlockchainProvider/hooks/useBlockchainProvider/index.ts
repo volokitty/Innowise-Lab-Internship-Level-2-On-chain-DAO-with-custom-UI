@@ -10,8 +10,11 @@ const useBlockchainProvider = (): {
   setConnected: React.Dispatch<React.SetStateAction<boolean>>;
   blockchain: any;
 } => {
+  const checkLocalStorageConnection = (): boolean =>
+    localStorage.getItem('connection') === 'connected';
+
   const [account, setAccount] = useState('');
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(checkLocalStorageConnection());
 
   const blockchain = BlockchainInit();
   const { hasMetamask, getAccounts, onDisconnect, setLocalStorageConnection } = blockchain;
@@ -21,8 +24,10 @@ const useBlockchainProvider = (): {
       getAccounts()
         .then((accounts: string[]) => {
           if (accounts.length > 0) {
-            setAccount(account[0]);
-            setConnected(true);
+            if (checkLocalStorageConnection()) {
+              setAccount(account[0]);
+              setConnected(true);
+            }
           }
         })
         .then(() =>
