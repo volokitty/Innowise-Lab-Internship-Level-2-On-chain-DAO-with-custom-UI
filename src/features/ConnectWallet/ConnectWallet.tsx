@@ -8,7 +8,7 @@ const ConnectWallet: React.FC = () => {
   const { buttonText, onClick } = useConnectWallet();
 
   return (
-    <Button buttonTheme="dark" onClick={onClick}>
+    <Button theme="dark" size="normal" onClick={onClick}>
       {buttonText}
     </Button>
   );

@@ -6,6 +6,7 @@ export interface BlockchainReturnType {
   setLocalStorageConnection: (connected: boolean) => void;
   onDisconnect: (callback: () => any) => void;
   getAccounts: () => Promise<string[]>;
+  getEthBalance: () => Promise<string>;
   hasMetamask: boolean;
 }
 
@@ -38,9 +39,16 @@ export const BlockchainInit = (): BlockchainReturnType => {
     return await web3.eth.getAccounts();
   };
 
+  const getEthBalance = async (): Promise<string> => {
+    const [account] = await getAccounts();
+    const wei = await web3.eth.getBalance(account);
+    return web3.utils.fromWei(wei, 'ether');
+  };
+
   return {
     openMetamaskPage,
     connectWallet,
+    getEthBalance,
     setLocalStorageConnection,
     onDisconnect,
     getAccounts,

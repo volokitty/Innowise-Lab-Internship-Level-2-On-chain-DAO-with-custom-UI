@@ -5,6 +5,7 @@ import { BlockchainInit } from 'shared/lib/blockchain';
 const useBlockchainProvider = (): {
   account: string;
   connected: boolean;
+  ethBalance: string;
   hasMetamask: boolean;
   setAccount: React.Dispatch<React.SetStateAction<string>>;
   setConnected: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,6 +16,7 @@ const useBlockchainProvider = (): {
 
   const [account, setAccount] = useState('');
   const [connected, setConnected] = useState(checkLocalStorageConnection());
+  const [ethBalance, setEthBalance] = useState('');
 
   const blockchain = BlockchainInit();
   const { hasMetamask, getAccounts, onDisconnect, setLocalStorageConnection } = blockchain;
@@ -25,7 +27,7 @@ const useBlockchainProvider = (): {
         .then((accounts: string[]) => {
           if (accounts.length > 0) {
             if (checkLocalStorageConnection()) {
-              setAccount(account[0]);
+              setAccount(accounts[0]);
               setConnected(true);
             }
           }
@@ -42,11 +44,16 @@ const useBlockchainProvider = (): {
 
   useEffect(() => {
     setLocalStorageConnection(connected);
+    blockchain
+      .getEthBalance()
+      .then((balance) => setEthBalance(balance))
+      .catch((e) => console.log(e));
   }, [connected]);
 
   return {
     account,
     connected,
+    ethBalance,
     hasMetamask,
     setAccount,
     setConnected,
