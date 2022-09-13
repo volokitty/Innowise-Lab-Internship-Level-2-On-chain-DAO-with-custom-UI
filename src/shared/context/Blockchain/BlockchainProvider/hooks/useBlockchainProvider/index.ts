@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import AlertContext from 'shared/context/Alert/AlertContext';
 
 import { BlockchainInit } from 'shared/lib/blockchain';
 
@@ -21,6 +22,8 @@ const useBlockchainProvider = (): {
   const blockchain = BlockchainInit();
   const { hasMetamask, getAccounts, onDisconnect, setLocalStorageConnection } = blockchain;
 
+  const { spawnErrorAlert } = useContext(AlertContext);
+
   useEffect(() => {
     if (hasMetamask) {
       getAccounts()
@@ -38,16 +41,19 @@ const useBlockchainProvider = (): {
             setConnected(false);
           })
         )
-        .catch((e) => console.log(e));
+        .catch(({ message }) => spawnErrorAlert?.(message));
     }
   }, []);
 
   useEffect(() => {
     setLocalStorageConnection(connected);
-    blockchain
-      .getEthBalance()
-      .then((balance) => setEthBalance(balance))
-      .catch((e) => console.log(e));
+
+    if (connected) {
+      blockchain
+        .getEthBalance()
+        .then((balance) => setEthBalance(balance))
+        .catch(({ message }) => spawnErrorAlert?.(message));
+    }
   }, [connected]);
 
   return {

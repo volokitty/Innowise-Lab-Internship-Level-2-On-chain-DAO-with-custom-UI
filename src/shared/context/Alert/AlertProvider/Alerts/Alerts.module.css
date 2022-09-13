@@ -1,0 +1,12 @@
+.alerts {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translate(-50%, 0%);
+}
+
+.alerts div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}

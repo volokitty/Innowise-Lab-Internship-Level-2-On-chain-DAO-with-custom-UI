@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import AlertContext from 'shared/context/Alert/AlertContext';
 
 import BlockchainContext from 'shared/context/Blockchain/BlockchainContext';
 
@@ -14,6 +15,8 @@ const useConnectWallet = (): {
     blockchain,
   } = useContext(BlockchainContext);
 
+  const { spawnErrorAlert } = useContext(AlertContext);
+
   const openMetamaskPage = (): void => {
     blockchain?.openMetamaskPage();
   };
@@ -25,7 +28,7 @@ const useConnectWallet = (): {
         setAccount?.(account);
         setConnected?.(true);
       })
-      .catch((e) => console.log(e));
+      .catch(({ message }) => spawnErrorAlert?.(message));
   };
 
   const disconnect = (): void => {

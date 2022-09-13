@@ -11,7 +11,7 @@ import daotLogo from 'assets/daot.png';
 import style from './StatusBar.module.css';
 
 const StatusBar: React.FC = () => {
-  const { connected, account, ethBalance, onClick } = useStatusBar();
+  const { connected, buttonText, ethBalance, onClick } = useStatusBar();
   const { statusBar } = style;
 
   return connected ? (
@@ -20,7 +20,7 @@ const StatusBar: React.FC = () => {
         <Balance logoPath={daotLogo} tokenTicker="DAOT" balance={ethBalance} />
         <Balance logoPath={ethLogo} tokenTicker="ETH" balance={ethBalance} />
         <Button theme="light" size="small" onClick={onClick}>
-          {account}
+          {buttonText}
         </Button>
       </div>
     </div>
