@@ -3,37 +3,37 @@ import AlertContext from 'shared/context/Alert/AlertContext';
 
 import BlockchainContext from 'shared/context/Blockchain/BlockchainContext';
 
-const useConnectWallet = (): {
+interface ConnectWallet {
   buttonText: string;
   onClick: () => void;
-} => {
-  const {
-    hasMetamask = false,
-    connected = false,
-    setAccount,
-    setConnected,
-    blockchain,
-  } = useContext(BlockchainContext);
+}
 
-  const { spawnErrorAlert } = useContext(AlertContext);
+const useConnectWallet = (): ConnectWallet => {
+  const { connected = false, setAccount, setConnected, web3 } = useContext(BlockchainContext);
+
+  const { spawnSuccessAlert, spawnErrorAlert } = useContext(AlertContext);
+
+  const hasMetamask = Boolean(web3?.givenProvider);
 
   const openMetamaskPage = (): void => {
-    blockchain?.openMetamaskPage();
+    window.open('https://metamask.io/download/', '_blank');
   };
 
   const connect = (): void => {
-    blockchain
-      ?.connectWallet()
-      .then((account) => {
+    web3?.eth
+      .requestAccounts()
+      .then((accounts) => {
+        const [account] = accounts;
         setAccount?.(account);
         setConnected?.(true);
       })
+      .then(() => spawnSuccessAlert?.('Connected'))
       .catch(({ message }) => spawnErrorAlert?.(message));
   };
 
   const disconnect = (): void => {
-    setAccount?.('');
     setConnected?.(false);
+    spawnSuccessAlert?.('Disconnected');
   };
 
   const [state, setState] = useState<{ onClick: () => void; buttonText: string }>({

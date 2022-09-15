@@ -1,18 +1,24 @@
 import React from 'react';
 
-import { BlockchainReturnType } from 'shared/lib/blockchain';
+import Web3 from 'web3';
+import { Contract } from 'web3-eth-contract';
 
 interface IBlockchainContext {
   account: string;
   connected: boolean;
-  hasMetamask: boolean;
-  ethBalance: string;
-  tokenBalance: string;
-  setConnected: React.Dispatch<React.SetStateAction<boolean>>;
   setAccount: React.Dispatch<React.SetStateAction<string>>;
-  blockchain: BlockchainReturnType;
+  setConnected: React.Dispatch<React.SetStateAction<boolean>>;
+  web3: Web3;
+  contracts: {
+    token: Contract;
+    nft: Contract;
+    dao: Contract;
+  };
 }
 
-const BlockchainContext = React.createContext<Partial<IBlockchainContext>>({});
+const BlockchainContext = React.createContext<Partial<IBlockchainContext>>({
+  account: '',
+  connected: false,
+});
 
 export default BlockchainContext;

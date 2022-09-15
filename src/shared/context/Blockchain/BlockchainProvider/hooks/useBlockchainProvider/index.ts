@@ -1,69 +1,50 @@
 import { useState, useEffect, useContext } from 'react';
-import AlertContext from 'shared/context/Alert/AlertContext';
+
+import Web3 from 'web3';
+import { Contract } from 'web3-eth-contract';
 
 import { BlockchainInit } from 'shared/lib/blockchain';
+import AlertContext from 'shared/context/Alert/AlertContext';
 
-const useBlockchainProvider = (): {
+interface BlockchainProvider {
   account: string;
   connected: boolean;
-  ethBalance: string;
-  hasMetamask: boolean;
   setAccount: React.Dispatch<React.SetStateAction<string>>;
   setConnected: React.Dispatch<React.SetStateAction<boolean>>;
-  blockchain: any;
-} => {
-  const checkLocalStorageConnection = (): boolean =>
-    localStorage.getItem('connection') === 'connected';
+  web3: Web3;
+  contracts: {
+    token: Contract;
+    nft: Contract;
+    dao: Contract;
+  };
+}
 
+const useBlockchainProvider = (): BlockchainProvider => {
+  const { spawnSuccessAlert } = useContext(AlertContext);
   const [account, setAccount] = useState('');
-  const [connected, setConnected] = useState(checkLocalStorageConnection());
-  const [ethBalance, setEthBalance] = useState('');
+  const [connected, setConnected] = useState(false);
 
   const blockchain = BlockchainInit();
-  const { hasMetamask, getAccounts, onDisconnect, setLocalStorageConnection } = blockchain;
+  const { web3, onDisconnect, contracts } = blockchain;
 
-  const { spawnErrorAlert } = useContext(AlertContext);
+  const hasMetamask = Boolean(web3?.givenProvider);
 
   useEffect(() => {
     if (hasMetamask) {
-      getAccounts()
-        .then((accounts: string[]) => {
-          if (accounts.length > 0) {
-            if (checkLocalStorageConnection()) {
-              setAccount(accounts[0]);
-              setConnected(true);
-            }
-          }
-        })
-        .then(() =>
-          onDisconnect(() => {
-            setAccount('');
-            setConnected(false);
-          })
-        )
-        .catch(({ message }) => spawnErrorAlert?.(message));
+      onDisconnect(() => {
+        setConnected(false);
+        spawnSuccessAlert?.('Disconnected');
+      });
     }
   }, []);
-
-  useEffect(() => {
-    setLocalStorageConnection(connected);
-
-    if (connected) {
-      blockchain
-        .getEthBalance()
-        .then((balance) => setEthBalance(balance))
-        .catch(({ message }) => spawnErrorAlert?.(message));
-    }
-  }, [connected]);
 
   return {
     account,
     connected,
-    ethBalance,
-    hasMetamask,
     setAccount,
     setConnected,
-    blockchain,
+    web3,
+    contracts,
   };
 };
 

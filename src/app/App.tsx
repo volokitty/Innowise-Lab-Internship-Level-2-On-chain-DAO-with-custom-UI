@@ -6,7 +6,7 @@ import BlockchainProvider from 'shared/context/Blockchain/BlockchainProvider';
 
 import Header from 'widgets/Header';
 import Router from 'app/Router';
-import StatusBar from 'widgets/StatusBar';
+// import StatusBar from 'widgets/StatusBar';
 
 const App = (): JSX.Element => {
   return (
@@ -15,7 +15,7 @@ const App = (): JSX.Element => {
         <BrowserRouter>
           <div className="App">
             <Header />
-            <StatusBar />
+            {/* <StatusBar /> */}
             <Alerts />
             <main>
               <Router />
