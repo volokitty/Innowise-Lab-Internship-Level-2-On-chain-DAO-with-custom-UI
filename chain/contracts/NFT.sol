@@ -18,6 +18,11 @@ contract NFT is ERC721, Ownable {
 
     mapping(uint256 => uint8) tokenIdToRarity;
 
+    struct TokenInfo {
+        uint256 id;
+        uint8 rarity;
+    }
+
     IToken tokenContract;
     IDAO daoContract;
 
@@ -74,6 +79,21 @@ contract NFT is ERC721, Ownable {
 
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
+    }
+
+    function getNFTs() public view returns (TokenInfo[] memory) {
+        TokenInfo[] memory tokens = new TokenInfo[](balanceOf(msg.sender));
+        uint256 nextTokenId = _tokenIdCounter.current();
+
+        uint256 i = 0;
+        for (uint256 tokenId = 0; tokenId < nextTokenId; tokenId++) {
+            if (ownerOf(tokenId) == msg.sender) {
+                tokens[i] = TokenInfo(tokenId, tokenIdToRarity[tokenId]);
+                i++;
+            }
+        }
+
+        return tokens;
     }
 
     function getTokenRarity(uint256 _tokenId) public view returns (uint8) {

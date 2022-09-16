@@ -42,6 +42,18 @@ const useConnectWallet = (): ConnectWallet => {
   });
 
   useEffect(() => {
+    window.ethereum.on('accountsChanged', async (accounts: string[]) => {
+      if (accounts.length > 0) {
+        const accounts = await web3?.eth.getAccounts();
+
+        if (accounts !== undefined) {
+          setAccount?.(accounts[0]);
+        }
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     if (!hasMetamask) {
       setState({ onClick: openMetamaskPage, buttonText: 'Download Metamask' });
     } else if (hasMetamask && !connected) {
