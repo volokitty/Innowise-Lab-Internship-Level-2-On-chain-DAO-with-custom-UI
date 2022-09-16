@@ -1,24 +1,18 @@
-import React from 'react';
+import React, { ButtonHTMLAttributes } from 'react';
 
 import style from './Button.module.css';
 
-interface ButtonProps {
-  children: JSX.Element | string;
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   theme: 'dark' | 'light';
   size: 'normal' | 'small';
-  onClick?: () => void;
 }
 
-const Button: React.FC<ButtonProps> = ({ children, theme, size, onClick }) => {
+const Button: React.FC<ButtonProps> = ({ theme, size, ...rest }) => {
   const { button, dark, light, normal, small } = style;
   const buttonTheme = theme === 'dark' ? dark : light;
   const buttonSize = size === 'normal' ? normal : small;
 
-  return (
-    <button className={`${button} ${buttonTheme} ${buttonSize}`} onClick={onClick}>
-      {children}
-    </button>
-  );
+  return <button className={`${button} ${buttonTheme} ${buttonSize}`} {...rest}></button>;
 };
 
 export default Button;

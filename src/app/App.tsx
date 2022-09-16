@@ -5,8 +5,8 @@ import AlertProvider, { Alerts } from 'shared/context/Alert/AlertProvider';
 import BlockchainProvider from 'shared/context/Blockchain/BlockchainProvider';
 
 import Header from 'widgets/Header';
-import Router from 'app/Router';
-// import StatusBar from 'widgets/StatusBar';
+import Page from 'app/Page';
+import StatusBar from 'widgets/StatusBar';
 
 const App = (): JSX.Element => {
   return (
@@ -15,10 +15,10 @@ const App = (): JSX.Element => {
         <BrowserRouter>
           <div className="App">
             <Header />
-            {/* <StatusBar /> */}
+            <StatusBar />
             <Alerts />
             <main>
-              <Router />
+              <Page />
             </main>
           </div>
         </BrowserRouter>

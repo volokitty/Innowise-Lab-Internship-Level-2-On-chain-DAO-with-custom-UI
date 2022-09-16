@@ -6,11 +6,15 @@ import BlockchainContext from 'shared/context/Blockchain/BlockchainContext';
 interface StatusBar {
   connected: boolean;
   buttonText: string;
+  tokenBalance: string;
+  ethBalance: string;
   onClick: () => void;
 }
 
 const useStatusBar = (): StatusBar => {
-  const { connected = false, account = '', contracts } = useContext(BlockchainContext);
+  const { connected = false, account = '', contracts, web3 } = useContext(BlockchainContext);
+  const [ethBalance, setEthBalance] = useState('');
+  const [tokenBalance, setTokenBalance] = useState('');
   const [buttonText, setButtonText] = useState(account);
 
   const { spawnSuccessAlert, spawnErrorAlert } = useContext(AlertContext);
@@ -21,8 +25,27 @@ const useStatusBar = (): StatusBar => {
   useEffect(() => {
     setButtonText(reduceAddress(account));
 
-    if (account.length) {
-      contracts?.token.methods.balanceOf(account).call(console.log);
+    if (account !== '') {
+      web3?.eth
+        .getBalance(account)
+        .then((result) => {
+          const eth = web3?.utils.fromWei(result, 'ether');
+
+          setEthBalance(eth);
+        })
+        .catch((error) => spawnErrorAlert?.(error));
+
+      contracts?.token.methods.balanceOf(account).call((error: any, result: string) => {
+        if (error !== null) {
+          spawnErrorAlert?.(error);
+        }
+
+        const eth = web3?.utils.fromWei(result, 'ether');
+
+        if (eth !== undefined) {
+          setTokenBalance?.(eth);
+        }
+      });
     }
   }, [account]);
 
@@ -33,7 +56,7 @@ const useStatusBar = (): StatusBar => {
       .catch(() => spawnErrorAlert?.("Can't copy"));
   };
 
-  return { connected, buttonText, onClick };
+  return { connected, buttonText, ethBalance, tokenBalance, onClick };
 };
 
 export default useStatusBar;
