@@ -13,8 +13,8 @@ interface StatusBar {
 
 const useStatusBar = (): StatusBar => {
   const { connected = false, account = '', contracts, web3 } = useContext(BlockchainContext);
-  const [ethBalance, setEthBalance] = useState('');
-  const [tokenBalance, setTokenBalance] = useState('');
+  const [ethBalance, setEthBalance] = useState('0');
+  const [tokenBalance, setTokenBalance] = useState('0');
   const [buttonText, setButtonText] = useState(account);
 
   const { spawnSuccessAlert, spawnErrorAlert } = useContext(AlertContext);

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 
 import BlockchainContext from 'shared/context/Blockchain/BlockchainContext';
+import AlertContext from 'shared/context/Alert/AlertContext';
 
 interface NFTControlBar {
   totalNFTPower: number;
@@ -8,6 +9,7 @@ interface NFTControlBar {
 
 const useNFTControlBar = (): NFTControlBar => {
   const { contracts, account } = useContext(BlockchainContext);
+  const { spawnErrorAlert } = useContext(AlertContext);
   const nft = contracts?.nft;
   const [totalNFTPower, setTotalNFTPower] = useState(0);
 
@@ -23,7 +25,7 @@ const useNFTControlBar = (): NFTControlBar => {
             .reduce((prev, curr) => prev + curr, 0)
         );
       })
-      .catch(({ message }: { message: string }) => console.log(message));
+      .catch(({ message }: { message: string }) => spawnErrorAlert?.(message));
   }, []);
 
   return { totalNFTPower };

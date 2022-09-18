@@ -37,6 +37,7 @@ const useClaimNFT = (): ClaimNFT => {
       .safeMint()
       .send({ value: web3?.utils.toHex(inputValue), from: account })
       .then(() => spawnSuccessAlert?.('Claimed NFT!'))
+      .then(() => setInputValue('0'))
       .catch(({ message }: { message: string }) => spawnErrorAlert?.(message));
   };
 
