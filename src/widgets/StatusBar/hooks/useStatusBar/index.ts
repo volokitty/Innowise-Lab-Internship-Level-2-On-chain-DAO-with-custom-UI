@@ -2,20 +2,24 @@ import { useContext, useEffect, useState } from 'react';
 import AlertContext from 'shared/context/Alert/AlertContext';
 
 import BlockchainContext from 'shared/context/Blockchain/BlockchainContext';
+import TokensContext from 'shared/context/Tokens/TokensContext';
 
 interface StatusBar {
   connected: boolean;
   buttonText: string;
-  tokenBalance: string;
   ethBalance: string;
+  daotBalance: string;
+  totalNFTRarity: number;
   onClick: () => void;
 }
 
 const useStatusBar = (): StatusBar => {
-  const { connected = false, account = '', contracts, web3 } = useContext(BlockchainContext);
-  const [ethBalance, setEthBalance] = useState('0');
-  const [tokenBalance, setTokenBalance] = useState('0');
+  const { connected = false, account = '' } = useContext(BlockchainContext);
+  const { ethBalance, daotBalance, updateETHBalance, updateDAOTBalance, nfts, updateNFTs } =
+    useContext(TokensContext);
+
   const [buttonText, setButtonText] = useState(account);
+  const [totalNFTRarity, setTotalNFTRarity] = useState(0);
 
   const { spawnSuccessAlert, spawnErrorAlert } = useContext(AlertContext);
 
@@ -23,30 +27,20 @@ const useStatusBar = (): StatusBar => {
     `${address.slice(0, 5)}...${address.slice(-2)}`;
 
   useEffect(() => {
+    setTotalNFTRarity(
+      nfts
+        .map(([_, rarity]) => [+rarity])
+        .flat()
+        .reduce((prev, curr) => prev + curr, 0)
+    );
+  }, [nfts]);
+
+  useEffect(() => {
     setButtonText(reduceAddress(account));
 
-    if (account !== '') {
-      web3?.eth
-        .getBalance(account)
-        .then((result) => {
-          const eth = web3?.utils.fromWei(result, 'ether');
-
-          setEthBalance(eth);
-        })
-        .catch((error) => spawnErrorAlert?.(error));
-
-      contracts?.token.methods.balanceOf(account).call((error: any, result: string) => {
-        if (error !== null) {
-          spawnErrorAlert?.(error);
-        }
-
-        const eth = web3?.utils.fromWei(result, 'ether');
-
-        if (eth !== undefined) {
-          setTokenBalance?.(eth);
-        }
-      });
-    }
+    updateETHBalance();
+    updateDAOTBalance();
+    updateNFTs();
   }, [account]);
 
   const onClick = (): void => {
@@ -56,7 +50,7 @@ const useStatusBar = (): StatusBar => {
       .catch(() => spawnErrorAlert?.("Can't copy"));
   };
 
-  return { connected, buttonText, ethBalance, tokenBalance, onClick };
+  return { connected, buttonText, ethBalance, daotBalance, totalNFTRarity, onClick };
 };
 
 export default useStatusBar;

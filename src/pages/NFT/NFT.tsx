@@ -1,13 +1,14 @@
-import React, { useContext } from 'react';
-import BlockchainContext from 'shared/context/Blockchain/BlockchainContext';
+import ClaimNFT from 'features/ClaimNFT';
+import React from 'react';
+import NFTCard from 'widgets/NFTCard';
 
-import NFTControlBar from 'widgets/NFTControlBar';
+import useNFTPage from './hooks/useNFTPage';
 
 import style from './NFT.module.css';
 
 const NFT: React.FC = () => {
-  const { nft } = style;
-  const { connected = false } = useContext(BlockchainContext);
+  const { nft, claim, nftCards } = style;
+  const { connected, nfts } = useNFTPage();
 
   if (!connected) {
     return (
@@ -20,7 +21,14 @@ const NFT: React.FC = () => {
   return (
     <div className={nft}>
       <div>
-        <NFTControlBar />
+        <div className={claim}>
+          <ClaimNFT />
+        </div>
+        <div className={nftCards}>
+          {nfts.map(([id, rarity]) => (
+            <NFTCard key={id} id={id} rarity={rarity} />
+          ))}
+        </div>
       </div>
     </div>
   );

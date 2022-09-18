@@ -1,15 +1,16 @@
 .statusBar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   width: var(--container-width);
   height: 48px;
   background-color: var(--color-black);
   margin: 0 auto;
+  padding: 0 8px;
 }
 
-.statusBar div {
+.balances {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-right: 8px;
 }

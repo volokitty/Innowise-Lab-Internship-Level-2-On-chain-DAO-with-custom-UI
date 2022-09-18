@@ -2,3 +2,14 @@
   max-width: var(--container-width);
   margin: 0 auto;
 }
+
+.claim {
+  display: flex;
+  justify-content: flex-end;
+  margin: 12px 0;
+}
+
+.nftCards {
+  display: flex;
+  gap: 8px;
+}

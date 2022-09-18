@@ -1,6 +1,8 @@
 import React, { useContext, useState } from 'react';
+
 import AlertContext from 'shared/context/Alert/AlertContext';
 import BlockchainContext from 'shared/context/Blockchain/BlockchainContext';
+import TokensContext from 'shared/context/Tokens/TokensContext';
 
 interface ClaimNFT {
   inputValue: string;
@@ -12,6 +14,7 @@ interface ClaimNFT {
 const useClaimNFT = (): ClaimNFT => {
   const { spawnSuccessAlert, spawnErrorAlert } = useContext(AlertContext);
   const { account, web3, contracts } = useContext(BlockchainContext);
+  const { updateETHBalance, updateDAOTBalance, updateNFTs } = useContext(TokensContext);
   const nft = contracts?.nft;
 
   const [inputValue, setInputValue] = useState('0');
@@ -38,6 +41,9 @@ const useClaimNFT = (): ClaimNFT => {
       .send({ value: web3?.utils.toHex(inputValue), from: account })
       .then(() => spawnSuccessAlert?.('Claimed NFT!'))
       .then(() => setInputValue('0'))
+      .then(() => updateDAOTBalance())
+      .then(() => updateETHBalance())
+      .then(() => updateNFTs())
       .catch(({ message }: { message: string }) => spawnErrorAlert?.(message));
   };
 
