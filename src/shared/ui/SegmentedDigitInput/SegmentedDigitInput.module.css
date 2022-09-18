@@ -1,0 +1,28 @@
+.segmentedInput {
+  display: inline-flex;
+  box-sizing: border-box;
+  /* border: 1px solid black; */
+}
+
+.segment {
+  height: 60px;
+  width: 40px;
+  box-sizing: border-box;
+  border: 1px solid black;
+  text-align: center;
+  line-height: 200%;
+  font-size: 28px;
+}
+
+.segmentedInput .segment:not(:nth-last-child(2)) {
+  border-right: none;
+}
+
+.segmentedInput input {
+  opacity: 0;
+  position: absolute;
+}
+
+.focusedSegment {
+  box-shadow: 0px 0px 0px 2px rgb(42, 163, 255);
+}
