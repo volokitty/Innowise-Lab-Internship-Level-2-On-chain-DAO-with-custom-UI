@@ -9,12 +9,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  font-size: 20px;
 }
 
 .votingForm p {
   margin: 0;
   color: red;
   font-size: 12px;
+  text-align: right;
 }
 
 .votingForm label input {

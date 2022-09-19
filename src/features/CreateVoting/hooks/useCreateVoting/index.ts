@@ -1,37 +1,128 @@
-import { useEffect } from 'react';
-import {
-  FieldErrorsImpl,
-  FieldValues,
-  useForm,
-  UseFormHandleSubmit,
-  UseFormRegister,
-} from 'react-hook-form';
+import React, { useContext, useState } from 'react';
+import AlertContext from 'shared/context/Alert/AlertContext';
+import BlockchainContext from 'shared/context/Blockchain/BlockchainContext';
 
 interface CreateVoting {
   onSubmit: (data: any) => void;
-  errors: FieldErrorsImpl<{
-    [x: string]: any;
-  }>;
-  register: UseFormRegister<FieldValues>;
-  handleSubmit: UseFormHandleSubmit<FieldValues>;
+  errors: {
+    description: string;
+    parameters: string;
+    time: string;
+  };
+  onDescriptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onTimeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onParametersChange: (parameters: number[]) => void;
+  onVotingTypeChange: (votingType: 0 | 1) => void;
 }
 
 const useCreateVoting = (): CreateVoting => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    mode: 'onBlur',
+  const [formData, setFormData] = useState({
+    description: '',
+    parameters: new Array(9).fill(0),
+    time: 300,
+    votingType: 0,
   });
 
-  const onSubmit = (data: any): void => console.log(JSON.stringify(data));
+  const [errors, setErrors] = useState({
+    description: '',
+    parameters: '',
+    time: '',
+  });
 
-  useEffect(() => {
-    console.log(errors);
-  }, [errors]);
+  const { spawnErrorAlert, spawnSuccessAlert } = useContext(AlertContext);
+  const { contracts } = useContext(BlockchainContext);
 
-  return { onSubmit, errors, register, handleSubmit };
+  const daoContract = contracts?.dao;
+
+  const validateDescription = (): string => {
+    if (formData.description.length === 0) {
+      setErrors({ ...errors, description: "Can't be empty" });
+      return "Can't be empty";
+    }
+
+    return '';
+  };
+
+  const onDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value;
+    setFormData({ ...formData, description: value });
+
+    if (value.length === 0) {
+      setErrors({ ...errors, description: "Can't be empty" });
+      return;
+    }
+
+    setErrors({ ...errors, description: '' });
+  };
+
+  const validateTime = (): string => {
+    if (formData.time < 5 || Number.isNaN(formData.time)) {
+      setErrors({ ...errors, time: 'At least 5 minutes' });
+      return 'At least 5 minutes';
+    }
+
+    return '';
+  };
+
+  const onTimeChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.valueAsNumber;
+    setFormData({ ...formData, time: value * 60 });
+
+    if (value < 5 || Number.isNaN(value)) {
+      setErrors({ ...errors, time: 'At least 5 minutes' });
+      return;
+    }
+
+    setErrors({ ...errors, time: '' });
+  };
+
+  const validateParameters = (): string => {
+    if (formData.parameters.length < 9) {
+      setErrors({ ...errors, parameters: "Can't be less than 9" });
+      return "Can't be less than 9";
+    }
+
+    return '';
+  };
+
+  const onParametersChange = (parameters: number[]): void => {
+    setFormData({ ...formData, parameters });
+
+    if (parameters.length < 9) {
+      setErrors({ ...errors, parameters: "Can't be less than 9" });
+      return;
+    }
+
+    setErrors({ ...errors, parameters: '' });
+  };
+
+  const onVotingTypeChange = (votingType: 0 | 1): void => {
+    setFormData({ ...formData, votingType });
+  };
+
+  const onSubmit = (e: React.SyntheticEvent): void => {
+    e.preventDefault();
+
+    const errors = [validateDescription(), validateParameters(), validateTime()];
+
+    if (''.concat(...errors) === '') {
+      const { description, parameters, time, votingType } = formData;
+      daoContract?.methods
+        .createVoting(description, parameters, time, votingType)
+        .call()
+        .then(() => spawnSuccessAlert?.('Voting created'))
+        .catch(({ message }: { message: string }) => spawnErrorAlert?.(message));
+    }
+  };
+
+  return {
+    onSubmit,
+    errors,
+    onDescriptionChange,
+    onTimeChange,
+    onParametersChange,
+    onVotingTypeChange,
+  };
 };
 
 export default useCreateVoting;
