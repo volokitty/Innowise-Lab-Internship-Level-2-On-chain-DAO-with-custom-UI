@@ -1,6 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import AlertContext from 'shared/context/Alert/AlertContext';
 import BlockchainContext from 'shared/context/Blockchain/BlockchainContext';
+import VotingContext from 'shared/context/Voting/VotingContext';
 
 interface CreateVoting {
   onSubmit: (data: any) => void;
@@ -13,6 +14,7 @@ interface CreateVoting {
   onTimeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onParametersChange: (parameters: number[]) => void;
   onVotingTypeChange: (votingType: 0 | 1) => void;
+  currentNFTParameters: string;
 }
 
 const useCreateVoting = (): CreateVoting => {
@@ -29,10 +31,22 @@ const useCreateVoting = (): CreateVoting => {
     time: '',
   });
 
+  const [currentNFTParameters, setCurrentNFTParameters] = useState('');
+
   const { spawnErrorAlert, spawnSuccessAlert } = useContext(AlertContext);
   const { contracts, account } = useContext(BlockchainContext);
+  const { updateVotingEnded } = useContext(VotingContext);
 
   const daoContract = contracts?.dao;
+  const nftContract = contracts?.nft;
+
+  useEffect(() => {
+    nftContract?.methods
+      .getUniqueParameterValues()
+      .call()
+      .then((parameters: string) => setCurrentNFTParameters(parameters))
+      .catch(({ message }: { message: string }) => spawnErrorAlert?.(message));
+  }, []);
 
   const validateDescription = (): string => {
     if (formData.description.length === 0) {
@@ -111,6 +125,7 @@ const useCreateVoting = (): CreateVoting => {
         .createVoting(description, parameters, time, votingType)
         .send({ from: account })
         .then(() => spawnSuccessAlert?.('Voting created'))
+        .then(() => updateVotingEnded())
         .catch(({ message }: { message: string }) => spawnErrorAlert?.(message));
     }
   };
@@ -122,6 +137,7 @@ const useCreateVoting = (): CreateVoting => {
     onTimeChange,
     onParametersChange,
     onVotingTypeChange,
+    currentNFTParameters,
   };
 };
 

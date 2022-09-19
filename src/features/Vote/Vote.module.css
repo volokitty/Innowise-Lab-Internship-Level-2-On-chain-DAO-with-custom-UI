@@ -1,0 +1,16 @@
+.vote {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vote label {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.buttons {
+  display: flex;
+  gap: 20px;
+}

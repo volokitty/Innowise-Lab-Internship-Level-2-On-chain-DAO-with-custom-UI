@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import AlertProvider, { Alerts } from 'shared/context/Alert/AlertProvider';
 import BlockchainProvider from 'shared/context/Blockchain/BlockchainProvider';
 import TokensProvider from 'shared/context/Tokens/TokensProvider';
+import VotingProvider from 'shared/context/Voting/VotingProvider';
 
 import Header from 'widgets/Header';
 import Page from 'app/Page';
@@ -14,16 +15,18 @@ const App = (): JSX.Element => {
     <AlertProvider alertDelay={2000}>
       <BlockchainProvider>
         <TokensProvider>
-          <BrowserRouter>
-            <div className="App">
-              <Header />
-              <StatusBar />
-              <Alerts />
-              <main>
-                <Page />
-              </main>
-            </div>
-          </BrowserRouter>
+          <VotingProvider>
+            <BrowserRouter>
+              <div className="App">
+                <Header />
+                <StatusBar />
+                <Alerts />
+                <main>
+                  <Page />
+                </main>
+              </div>
+            </BrowserRouter>
+          </VotingProvider>
         </TokensProvider>
       </BlockchainProvider>
     </AlertProvider>
