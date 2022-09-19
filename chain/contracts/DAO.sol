@@ -181,6 +181,10 @@ contract DAO is Ownable {
         return lastVotingIndex;
     }
 
+    function getVotingsLength() public view returns (uint256) {
+        return votings.length;
+    }
+
     function getLastVotingUniqueParameters() public view returns (uint8[9] memory) {
         require(getVotingsCount() > 0, "There hasn't been votings yet");
         require(isVotingEnded(), "The voting hasn't ended");

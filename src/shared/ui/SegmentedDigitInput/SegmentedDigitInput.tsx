@@ -1,18 +1,21 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, InputHTMLAttributes } from 'react';
 
 import style from './SegmentedDigitInput.module.css';
 
-interface SegmentedDigitInputProps {
+interface SegmentedDigitInputProps extends InputHTMLAttributes<HTMLInputElement> {
   length: number;
+  register: any;
 }
 
-const SegmentedDigitInput: React.FC<SegmentedDigitInputProps> = ({ length }) => {
-  const { segmentedInput, segment, focusedSegment } = style;
+const SegmentedDigitInput: React.FC<SegmentedDigitInputProps> = ({ length, register }) => {
+  const { segmentedInput, segment } = style;
   const [value, setValue] = useState('');
   const [digits, setDigits] = useState(new Array(length).fill(0));
-  const [focused, setFocused] = useState(false);
-  const [focusIndex, setFocusIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [inputRef, setInputRef] = useState<React.RefObject<HTMLInputElement>>();
+
+  useEffect(() => {
+    setInputRef(register?.ref);
+  }, [register]);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
@@ -26,42 +29,29 @@ const SegmentedDigitInput: React.FC<SegmentedDigitInputProps> = ({ length }) => 
     const digits = value.split('').map((digit) => +digit);
 
     setDigits([...digits, ...new Array(length - digits.length).fill(0)]);
-
-    if (digits.length === 0) {
-      setFocusIndex(0);
-    }
-
-    if (digits.length > 0 && digits.length < length) {
-      setFocusIndex(digits.length);
-    }
-
-    if (focusIndex === length - 1 && digits.length === length - 1) {
-      setFocusIndex(focusIndex - 1);
-    }
   }, [value]);
 
   const onClick = (): void => {
-    if (inputRef.current !== null) {
-      const length = value.length;
-
-      inputRef.current.setSelectionRange(length, length);
-      inputRef.current.focus();
-      setFocused(true);
-    }
+    inputRef?.current?.focus();
   };
 
   return (
     <div className={segmentedInput}>
       {digits.map((digit, index) => (
-        <div
-          key={index}
-          className={`${segment} ${index === focusIndex && focused ? focusedSegment : ''}`}
-          onClick={onClick}
-        >
+        <div key={index} className={segment} onClick={onClick}>
           {digit}
         </div>
       ))}
-      <input value={value} ref={inputRef} onChange={onChange} onBlur={() => setFocused(false)} />
+      <input
+        value={value}
+        ref={inputRef}
+        name={register?.name}
+        onChange={(e: any) => {
+          onChange(e);
+          register?.onChange(e);
+        }}
+        onBlur={register?.onBlur}
+      />
     </div>
   );
 };

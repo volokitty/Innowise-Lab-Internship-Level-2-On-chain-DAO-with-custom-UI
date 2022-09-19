@@ -1,0 +1,30 @@
+.votingForm {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  gap: 16px;
+}
+
+.votingForm label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.votingForm p {
+  margin: 0;
+  color: red;
+  font-size: 12px;
+}
+
+.votingForm label input {
+  height: 32px;
+  padding-left: 8px;
+  border: 2px solid var(--color-black);
+  border-radius: 8px;
+}
+
+.votingTypes {
+  display: flex;
+  gap: 20px;
+}
