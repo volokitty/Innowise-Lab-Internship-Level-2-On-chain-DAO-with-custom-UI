@@ -30,7 +30,7 @@ const useCreateVoting = (): CreateVoting => {
   });
 
   const { spawnErrorAlert, spawnSuccessAlert } = useContext(AlertContext);
-  const { contracts } = useContext(BlockchainContext);
+  const { contracts, account } = useContext(BlockchainContext);
 
   const daoContract = contracts?.dao;
 
@@ -109,7 +109,7 @@ const useCreateVoting = (): CreateVoting => {
       const { description, parameters, time, votingType } = formData;
       daoContract?.methods
         .createVoting(description, parameters, time, votingType)
-        .call()
+        .send({ from: account })
         .then(() => spawnSuccessAlert?.('Voting created'))
         .catch(({ message }: { message: string }) => spawnErrorAlert?.(message));
     }
