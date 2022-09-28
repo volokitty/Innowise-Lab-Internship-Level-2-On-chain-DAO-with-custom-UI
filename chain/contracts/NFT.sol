@@ -28,41 +28,13 @@ contract NFT is ERC721, Ownable {
 
     constructor() ERC721('NFT', 'DAON') {}
 
-    function needToUpdateUniqueParameterValues() private view returns (bool) {
-        uint256 lastVotingIndex = daoContract.getLastVotingIndex();
-
-        if (!daoContract.isVotingAccepted(lastVotingIndex)) {
-            return false;
-        }
-
-        uint8[9] memory daoUniqueParameterValues = daoContract.getLastVotingUniqueParameters();
-
-        for (uint256 i = 0; i < 9; i++) {
-            if (uniqueParameterValues[i] != daoUniqueParameterValues[i]) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    function setUniqueParameterValues(uint8[9] memory _uniqueParameterValues) private {
+    function setUniqueParameterValues(uint8[9] memory _uniqueParameterValues) public {
         uniqueParameterValues = _uniqueParameterValues;
         _tokenRarityIndexCounter.reset();
     }
 
     function safeMint() external payable {
         require(msg.value > 0, 'The amount sent must be greater than zero');
-
-        if (_tokenIdCounter.current() != 0) {
-            if (
-                daoContract.getVotingsCount() > 0 &&
-                daoContract.isVotingEnded() &&
-                needToUpdateUniqueParameterValues()
-            ) {
-                setUniqueParameterValues(daoContract.getLastVotingUniqueParameters());
-            }
-        }
 
         tokenContract.mint(msg.sender, msg.value);
 

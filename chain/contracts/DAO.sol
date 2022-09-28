@@ -47,6 +47,16 @@ contract DAO is Ownable {
         return false;
     }
 
+    function acceptVoting() public {
+        require(msg.sender == votings[lastVotingIndex].author, 'You must be creator of the voting');
+        require(
+            votings.length == 0 || votings[lastVotingIndex].endTime < block.timestamp,
+            'The voting is not ended'
+        );
+
+        nftContract.setUniqueParameterValues(votings[lastVotingIndex].uniqueParameterValues);
+    }
+
     function addVote(uint256 _amount, bool _isPositive) private {
         votingHashToVoters[votings[lastVotingIndex].hash][msg.sender] = Vote({
             isPositive: _isPositive,

@@ -7,4 +7,6 @@ interface INFT is IERC721 {
     function getNextTokenId() external view returns (uint256);
 
     function getTokenRarity(uint256 _tokenId) external view returns (uint8);
+
+    function setUniqueParameterValues(uint8[9] memory _uniqueParameterValues) external;
 }
