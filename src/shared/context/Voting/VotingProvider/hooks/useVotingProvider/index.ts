@@ -11,24 +11,29 @@ interface Voting {
   positive: string;
   startTime: string;
   votingType: string;
+  confirmed: string | boolean;
 }
 
 interface VotingProvider {
   votingEnded: boolean;
   lastVoting: Voting | undefined;
   lastVotingParameters: string[];
+  lastVotingConfirmed: boolean;
+  updateLastVotingConfirmed: () => void;
   updateVotingEnded: () => void;
   updateLastVoting: () => void;
   updateLastVotingParameters: () => void;
+  confirmVoting: () => void;
 }
 
 const useVotingProvider = (): VotingProvider => {
-  const { spawnErrorAlert } = useContext(AlertContext);
-  const { contracts } = useContext(BlockchainContext);
+  const { spawnSuccessAlert, spawnErrorAlert } = useContext(AlertContext);
+  const { contracts, account = '' } = useContext(BlockchainContext);
   const daoContract = contracts?.dao;
 
   const [lastVoting, setLastVoting] = useState<Voting>();
   const [votingEnded, setVotingEnded] = useState(true);
+  const [lastVotingConfirmed, setLastVotingConfirmed] = useState(true);
   const [lastVotingParameters, setLastVotingParameters] = useState(['']);
 
   const getLastVoting = (callback: (voting: Voting) => void): void => {
@@ -63,13 +68,37 @@ const useVotingProvider = (): VotingProvider => {
     getLastVoting((voting: Voting) => setVotingEnded(Date.now() / 1000 > +voting.endTime));
   };
 
+  const updateLastVotingConfirmed = (): void => {
+    getLastVoting((voting: Voting) => {
+      const confirmed = voting.confirmed;
+
+      if (confirmed === 'true' || confirmed === true) {
+        setLastVotingConfirmed(true);
+      } else {
+        setLastVotingConfirmed(false);
+      }
+    });
+  };
+
+  const confirmVoting = (): void => {
+    daoContract?.methods
+      .confirmVoting()
+      .send({ from: account })
+      .then(() => spawnSuccessAlert?.('Confirmed voting'))
+      .then(() => updateLastVotingConfirmed())
+      .catch(({ message }: { message: string }) => spawnErrorAlert?.(message));
+  };
+
   return {
     votingEnded,
     lastVoting,
     lastVotingParameters,
+    lastVotingConfirmed,
     updateLastVoting,
     updateVotingEnded,
     updateLastVotingParameters,
+    updateLastVotingConfirmed,
+    confirmVoting,
   };
 };
 

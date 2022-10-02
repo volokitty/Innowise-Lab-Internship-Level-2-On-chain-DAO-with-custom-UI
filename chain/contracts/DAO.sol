@@ -26,6 +26,7 @@ contract DAO is Ownable {
         uint256 endTime;
         uint256 positive;
         uint256 negative;
+        bool confirmed;
         bytes32 hash;
     }
 
@@ -47,14 +48,13 @@ contract DAO is Ownable {
         return false;
     }
 
-    function acceptVoting() public {
+    function confirmVoting() public {
         require(msg.sender == votings[lastVotingIndex].author, 'You must be creator of the voting');
-        require(
-            votings.length == 0 || votings[lastVotingIndex].endTime < block.timestamp,
-            'The voting is not ended'
-        );
+        require(votings[lastVotingIndex].confirmed == false, 'Already confirmed');
 
-        nftContract.setUniqueParameterValues(votings[lastVotingIndex].uniqueParameterValues);
+        votings[lastVotingIndex].confirmed = true;
+
+        nftContract.setUniqueParameterValues(getLastVotingUniqueParameters());
     }
 
     function addVote(uint256 _amount, bool _isPositive) private {
@@ -149,6 +149,7 @@ contract DAO is Ownable {
                 endTime: block.timestamp + votingTime,
                 positive: 0,
                 negative: 0,
+                confirmed: false,
                 hash: keccak256(
                     abi.encode(
                         msg.sender,

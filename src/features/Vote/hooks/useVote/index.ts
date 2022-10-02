@@ -12,7 +12,6 @@ interface Vote {
   lastVotingParameters: string[];
   votingType: string | undefined;
   voted: boolean;
-  time: number;
   canVote: boolean;
   votePositive: () => void;
   voteNegative: () => void;
@@ -26,6 +25,7 @@ const useVote = (): Vote => {
     updateLastVotingParameters,
     lastVoting,
     lastVotingParameters,
+    updateLastVotingConfirmed,
   } = useContext(VotingContext);
 
   const { spawnSuccessAlert, spawnErrorAlert } = useContext(AlertContext);
@@ -38,7 +38,6 @@ const useVote = (): Vote => {
   const [amount, setAmount] = useState(1);
   const [votingType, setVotingType] = useState('');
   const [voted, setVoted] = useState(false);
-  const [time, setTime] = useState(0);
 
   const vote = (isPositive: boolean): void => {
     tokenContract?.methods
@@ -82,10 +81,10 @@ const useVote = (): Vote => {
       setVotingType(lastVoting.votingType === '0' ? 'DAOT' : 'NFT');
       updateVoted();
 
-      setTime(+lastVoting.endTime - Math.floor(Date.now() / 1000));
-      setInterval(() => setTime((prev) => prev - 1), 1000);
-
-      setTimeout(() => updateVotingEnded(), +endTime * 1000 - Date.now());
+      setTimeout(() => {
+        updateVotingEnded();
+        updateLastVotingConfirmed();
+      }, +endTime * 1000 - Date.now());
     }
   }, [lastVoting]);
 
@@ -96,7 +95,6 @@ const useVote = (): Vote => {
     voted,
     voteNegative,
     votingType,
-    time,
     onAmountChange,
     canVote: +daotBalance > 0,
   };

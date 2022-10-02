@@ -17,7 +17,6 @@ const Vote: React.FC = () => {
     voteNegative,
     votingType,
     voted,
-    time,
     canVote,
   } = useVote();
 
@@ -30,7 +29,6 @@ const Vote: React.FC = () => {
         caption={lastVotingParameters.join(',')}
       />
       <LabelCaption theme="dark" size="normal" label="Description" caption={description} />
-      <LabelCaption theme="dark" size="normal" label="Seconds before end" caption={`${time}`} />
       <LabelCaption theme="dark" size="normal" label="Voting type" caption={votingType ?? ''} />
       {!voted && votingType === 'DAOT' && (
         <label>
